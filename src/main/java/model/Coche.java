@@ -2,6 +2,9 @@ package model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "Coche")
 public class Coche {
@@ -19,4 +22,76 @@ public class Coche {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "propietario_id")
     private Propietario propietario;
+
+    @ManyToMany
+    @JoinTable(
+            name = "coche_equipamiento",
+            joinColumns = @JoinColumn(name = "coche_matricula"),
+            inverseJoinColumns = @JoinColumn(name = "equipamiento_id")
+    )
+    private Set<Equipamiento> equipamientos = new HashSet<>();
+
+    public Coche(String matricula, String marca, String modelo, double precio_base, Concesionario concesionario) {
+        this.matricula = matricula;
+        this.marca = marca;
+        this.modelo = modelo;
+        this.precio_base = precio_base;
+        this.concesionario = concesionario;
+    }
+
+    public String getMatricula() {
+        return matricula;
+    }
+
+    public void setMatricula(String matricula) {
+        this.matricula = matricula;
+    }
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public String getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+
+    public double getPrecio_base() {
+        return precio_base;
+    }
+
+    public void setPrecio_base(double precio_base) {
+        this.precio_base = precio_base;
+    }
+
+    public Concesionario getConcesionario() {
+        return concesionario;
+    }
+
+    public void setConcesionario(Concesionario concesionario) {
+        this.concesionario = concesionario;
+    }
+
+    public Propietario getPropietario() {
+        return propietario;
+    }
+
+    public void setPropietario(Propietario propietario) {
+        this.propietario = propietario;
+    }
+
+    public Set<Equipamiento> getEquipamientos() {
+        return equipamientos;
+    }
+
+    public void setEquipamientos(Set<Equipamiento> equipamientos) {
+        this.equipamientos = equipamientos;
+    }
 }
