@@ -1,3 +1,7 @@
+import model.Concesionario;
+import model.Mecanico;
+
+import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
@@ -104,13 +108,41 @@ public class Menu {
             sc.nextLine();
 
             switch (opcion) {
-                case 1 -> Servicios.stockConcesionario();
-                case 2 -> Servicios.historialMecanico();
+                case 1 -> menuStockConcesionario();
+                case 2 -> menuHistorialMecanico();
                 case 3 -> Servicios.ventasPorConcesionario();
                 case 4 -> Servicios.costeActualCoche();
                 case 0 -> {}
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
+    }
+
+    private static void menuHistorialMecanico() {
+        boolean menu = true;
+        int id = 0;
+        List<Mecanico> mecanicos = Servicios.listadoMecanicos();
+        System.out.println(mecanicos);
+        while (menu) {
+            System.out.println("Inserta la ID del Mecanico");
+            id = Integer.parseInt(sc.nextLine());
+            int finalId = id;
+            if (mecanicos.stream().anyMatch(mecanico-> mecanico.getId()== finalId)) menu = false;
+        }
+        Servicios.historialMecanico(id);
+    }
+
+    private static void menuStockConcesionario() {
+        boolean menu = true;
+        int id = 0;
+        List<Concesionario> concesionarios = Servicios.listadoConcesionarios();
+        System.out.println(concesionarios);
+        while (menu) {
+            System.out.println("Inserta la ID del Concesionario");
+            id = Integer.parseInt(sc.nextLine());
+            int finalId = id;
+            if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)) menu = false;
+        }
+        Servicios.stockConcesionario(id);
     }
 }

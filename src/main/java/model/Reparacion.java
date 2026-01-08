@@ -32,6 +32,10 @@ public class Reparacion {
         this.mecanico = mecanico;
     }
 
+    public Reparacion() {
+
+    }
+
     public long getId() {
         return id;
     }
@@ -78,5 +82,16 @@ public class Reparacion {
 
     public void setMecanico(Mecanico mecanico) {
         this.mecanico = mecanico;
+    }
+
+    @Override
+    public String toString() {
+        return "\nReparacion:" +
+                "\n   id= " + id +
+                "\n   fecha= " + fecha +
+                "\n   coste= " + coste +
+                "\n   descripcion= " + descripcion +
+                "\n   coche= " + coche.getMatricula() +
+                "\n   mecanico= " + mecanico.getNombre();
     }
 }

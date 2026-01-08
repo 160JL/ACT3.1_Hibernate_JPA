@@ -19,6 +19,10 @@ public class Propietario {
         this.nombre = nombre;
     }
 
+    public Propietario() {
+
+    }
+
     public long getId() {
         return id;
     }

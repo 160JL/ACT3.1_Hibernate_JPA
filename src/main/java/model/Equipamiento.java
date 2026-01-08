@@ -17,6 +17,10 @@ public class Equipamiento {
         this.coste = coste;
     }
 
+    public Equipamiento() {
+
+    }
+
     public long getId() {
         return id;
     }

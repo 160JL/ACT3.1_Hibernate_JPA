@@ -17,6 +17,9 @@ public class Concesionario {
         this.direccion = direccion;
     }
 
+    public Concesionario() {
+    }
+
     public long getId() {
         return id;
     }
@@ -39,5 +42,13 @@ public class Concesionario {
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
+    }
+
+    @Override
+    public String toString() {
+        return "\nConcesionario:" +
+                "\n   id=" + id +
+                "\n   nombre='" + nombre +
+                "\n   direccion='" + direccion;
     }
 }

@@ -156,12 +156,38 @@ public class Servicios {
         System.out.println("Venta realizada correctamente");
     }
 
-    public static void stockConcesionario() {
+    public static void stockConcesionario(int id) {
         System.out.println("Listado de stock");
+
+        EntityManager em;
+        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+
+            List<Coche> coches = em.createQuery("SELECT c FROM Coche c").getResultList();
+            for (Coche coche : coches) {
+                if (coche.getConcesionario().getId() == id) {System.out.println(coche);}
+            }
+        }
+
+
     }
 
-    public static void historialMecanico() {
+    public static void historialMecanico(int id) {
         System.out.println("Historial del mecánico");
+
+        EntityManager em;
+        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+
+            List<Reparacion> reparacions = em.createQuery("SELECT r FROM Reparacion r").getResultList();
+            for (Reparacion reparacion : reparacions) {
+                if (reparacion.getMecanico().getId() == id) {System.out.println(reparacion);}
+            }
+        }
+
+
     }
 
     public static void ventasPorConcesionario() {
@@ -170,5 +196,22 @@ public class Servicios {
 
     public static void costeActualCoche() {
         System.out.println("Coste total del coche");
+    }
+
+    public static List<Concesionario> listadoConcesionarios() {
+        EntityManager em;
+        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
+            em = emf.createEntityManager();
+            return em.createQuery("SELECT c FROM Concesionario c").getResultList();
+        }
+
+    }
+
+    public static List<Mecanico> listadoMecanicos() {
+        EntityManager em;
+        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
+            em = emf.createEntityManager();
+            return em.createQuery("SELECT m FROM Mecanico m").getResultList();
+        }
     }
 }

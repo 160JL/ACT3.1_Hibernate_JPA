@@ -2,7 +2,6 @@ package model;
 
 import jakarta.persistence.*;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,6 +32,10 @@ public class Venta {
         this.concesionario = concesionario;
         this.propietario = propietario;
         this.coche = coche;
+    }
+
+    public Venta() {
+
     }
 
     public Long getId() {

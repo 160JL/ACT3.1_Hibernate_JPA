@@ -17,6 +17,9 @@ public class Mecanico {
         this.especialidad = especialidad;
     }
 
+    public Mecanico() {
+    }
+
     public long getId() {
         return id;
     }
@@ -39,5 +42,13 @@ public class Mecanico {
 
     public void setEspecialidad(String especialidad) {
         this.especialidad = especialidad;
+    }
+
+    @Override
+    public String toString() {
+        return "\nMecanico:" +
+                "\n   id=" + id +
+                "\n   nombre='" + nombre +
+                "\n   especialidad='" + especialidad;
     }
 }

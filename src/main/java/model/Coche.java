@@ -19,7 +19,7 @@ public class Coche {
     @JoinColumn(name = "concesionario_id")
     private Concesionario concesionario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "propietario_id")
     private Propietario propietario;
 
@@ -37,6 +37,10 @@ public class Coche {
         this.modelo = modelo;
         this.precio_base = precio_base;
         this.concesionario = concesionario;
+    }
+
+    public Coche() {
+
     }
 
     public String getMatricula() {
@@ -93,5 +97,13 @@ public class Coche {
 
     public void setEquipamientos(Set<Equipamiento> equipamientos) {
         this.equipamientos = equipamientos;
+    }
+
+    @Override
+    public String toString() {
+        if (propietario != null) {
+            return "\nCoche con matricula " + matricula + ":\n   Marca: " + marca + "\n   Modelo: " + modelo + "\n   Precio: " + precio_base + "\n   Propietario: " + propietario.getNombre();
+        } else
+            return "\nCoche con matricula " + matricula + ":\n   Marca: " + marca + "\n   Modelo: " + modelo + "\n   Precio: " + precio_base + "\n   Propietario: Sin propietario";
     }
 }
