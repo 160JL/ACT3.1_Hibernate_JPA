@@ -4,7 +4,9 @@ import jakarta.persistence.Persistence;
 import model.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Servicios {
     public static void iniciarEntityManager() {
@@ -166,7 +168,9 @@ public class Servicios {
 
             List<Coche> coches = em.createQuery("SELECT c FROM Coche c").getResultList();
             for (Coche coche : coches) {
-                if (coche.getConcesionario().getId() == id) {System.out.println(coche);}
+                if (coche.getConcesionario().getId() == id) {
+                    System.out.println(coche);
+                }
             }
         }
 
@@ -183,19 +187,62 @@ public class Servicios {
 
             List<Reparacion> reparacions = em.createQuery("SELECT r FROM Reparacion r").getResultList();
             for (Reparacion reparacion : reparacions) {
-                if (reparacion.getMecanico().getId() == id) {System.out.println(reparacion);}
+                if (reparacion.getMecanico().getId() == id) {
+                    System.out.println(reparacion);
+                }
             }
         }
 
 
     }
 
-    public static void ventasPorConcesionario() {
+    public static void ventasPorConcesionario(int id) {
         System.out.println("Ventas del concesionario");
+        EntityManager em;
+        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+
+            List<Venta> ventas = em.createQuery("SELECT v FROM Venta v").getResultList();
+            for (Venta venta : ventas) {
+                if (venta.getConcesionario().getId() == id) {
+                    System.out.println(venta);
+                }
+            }
+        }
     }
 
-    public static void costeActualCoche() {
+    public static void costeActualCoche(Coche coche) {
         System.out.println("Coste total del coche");
+        EntityManager em;
+        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+
+            double costeActual = 0.0;
+
+            List<Venta> ventas = em.createQuery("SELECT v FROM Venta v").getResultList();
+            for (Venta venta : ventas) {
+                if (Objects.equals(venta.getCoche().getMatricula(), coche.getMatricula())) {
+                    costeActual = costeActual + venta.getPrecio_final();
+                }
+            }
+
+            List<Reparacion> reparacions = em.createQuery("SELECT r FROM Reparacion r").getResultList();
+            for (Reparacion reparacion : reparacions) {
+                if (Objects.equals(reparacion.getCoche().getMatricula(), coche.getMatricula())) {
+                    costeActual = costeActual + reparacion.getCoste();
+                }
+            }
+
+            if (coche.getEquipamientos() != null) {
+                for (Equipamiento equipamiento : coche.getEquipamientos()) {
+                    costeActual = costeActual + equipamiento.getCoste();
+                }
+            }
+
+            System.out.println("Precio actual del coche: " + costeActual);
+        }
     }
 
     public static List<Concesionario> listadoConcesionarios() {
@@ -212,6 +259,14 @@ public class Servicios {
         try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
             em = emf.createEntityManager();
             return em.createQuery("SELECT m FROM Mecanico m").getResultList();
+        }
+    }
+
+    public static List<Coche> listadoCochesPropietarios() {
+        EntityManager em;
+        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
+            em = emf.createEntityManager();
+            return em.createQuery("SELECT c FROM Coche c JOIN FETCH c.propietario LEFT JOIN FETCH c.equipamientos").getResultList();
         }
     }
 }

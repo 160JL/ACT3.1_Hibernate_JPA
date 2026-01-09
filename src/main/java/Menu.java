@@ -1,7 +1,9 @@
+import model.Coche;
 import model.Concesionario;
 import model.Mecanico;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Menu {
@@ -26,8 +28,11 @@ public class Menu {
 
             switch (opcion) {
                 case 1 -> Servicios.iniciarEntityManager();
+                //TODO
                 case 2 -> menuStock();
+                //TODO
                 case 3 -> menuTaller();
+                //TODO
                 case 4 -> menuVentas();
                 case 5 -> menuConsultas();
                 case 0 -> System.out.println("Saliendo del sistema...");
@@ -48,7 +53,9 @@ public class Menu {
             sc.nextLine();
 
             switch (opcion) {
+                //TODO
                 case 1 -> Servicios.altaConcesionario();
+                //TODO
                 case 2 -> Servicios.altaCoche();
                 case 0 -> {}
                 default -> System.out.println("Opción inválida");
@@ -68,7 +75,9 @@ public class Menu {
             sc.nextLine();
 
             switch (opcion) {
+                //TODO
                 case 1 -> Servicios.instalarExtra();
+                //TODO
                 case 2 -> Servicios.registrarReparacion();
                 case 0 -> {}
                 default -> System.out.println("Opción inválida");
@@ -87,6 +96,7 @@ public class Menu {
             sc.nextLine();
 
             switch (opcion) {
+                //TODO
                 case 1 -> Servicios.venderCoche();
                 case 0 -> {}
                 default -> System.out.println("Opción inválida");
@@ -108,14 +118,31 @@ public class Menu {
             sc.nextLine();
 
             switch (opcion) {
-                case 1 -> menuStockConcesionario();
+                case 1 -> menuStockVentasConcesionario(true);
                 case 2 -> menuHistorialMecanico();
-                case 3 -> Servicios.ventasPorConcesionario();
-                case 4 -> Servicios.costeActualCoche();
+                case 3 -> menuStockVentasConcesionario(false);
+                case 4 -> menuCosteActualCoche();
                 case 0 -> {}
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
+    }
+
+    private static void menuCosteActualCoche() {
+        boolean menu = true;
+        String id = null;
+        Coche cochent = null;
+        List<Coche> coches = Servicios.listadoCochesPropietarios();
+        System.out.println(coches);
+        while (menu) {
+            System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
+            id = sc.nextLine();
+            String finalId = id;
+            cochent = coches.stream().filter(coche-> Objects.equals(coche.getMatricula(), finalId.trim())).findFirst().orElse(null);
+            if (cochent!=null||finalId.trim().equals("0")) menu = false;
+        }
+        if (id.trim().equals("0")) return;
+        Servicios.costeActualCoche(cochent);
     }
 
     private static void menuHistorialMecanico() {
@@ -124,25 +151,27 @@ public class Menu {
         List<Mecanico> mecanicos = Servicios.listadoMecanicos();
         System.out.println(mecanicos);
         while (menu) {
-            System.out.println("Inserta la ID del Mecanico");
+            System.out.println("Inserta la ID del Mecanico. Inserte 0 para cancelar:");
             id = Integer.parseInt(sc.nextLine());
             int finalId = id;
-            if (mecanicos.stream().anyMatch(mecanico-> mecanico.getId()== finalId)) menu = false;
+            if (mecanicos.stream().anyMatch(mecanico-> mecanico.getId()== finalId)||finalId==0) menu = false;
         }
+        if (id == 0) return;
         Servicios.historialMecanico(id);
     }
 
-    private static void menuStockConcesionario() {
+    private static void menuStockVentasConcesionario(boolean stock) {
         boolean menu = true;
         int id = 0;
         List<Concesionario> concesionarios = Servicios.listadoConcesionarios();
         System.out.println(concesionarios);
         while (menu) {
-            System.out.println("Inserta la ID del Concesionario");
+            System.out.println("Inserta la ID del Concesionario. Inserte 0 para cancelar:");
             id = Integer.parseInt(sc.nextLine());
             int finalId = id;
-            if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)) menu = false;
+            if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)||finalId==0) menu = false;
         }
-        Servicios.stockConcesionario(id);
+        if (id == 0) return;
+        if (stock) Servicios.stockConcesionario(id); else Servicios.ventasPorConcesionario(id);
     }
 }
