@@ -23,8 +23,12 @@ public class Menu {
             System.out.println("0. Salir");
             System.out.print("Seleccione opción: \n");
 
-            opcion = sc.nextInt();
-            sc.nextLine();
+            try {
+                // Leemos la línea completa y la convertimos
+                opcion = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                opcion = -1; // Fuerza el default en el switch
+            }
 
             switch (opcion) {
                 case 1 -> Servicios.iniciarEntityManager();
@@ -49,8 +53,12 @@ public class Menu {
             System.out.println("2. Alta de Coche");
             System.out.println("0. Volver");
 
-            opcion = sc.nextInt();
-            sc.nextLine();
+            try {
+                // Leemos la línea completa y la convertimos
+                opcion = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                opcion = -1; // Fuerza el default en el switch
+            }
 
             switch (opcion) {
                 //TODO
@@ -71,8 +79,12 @@ public class Menu {
             System.out.println("2. Registrar Reparación");
             System.out.println("0. Volver");
 
-            opcion = sc.nextInt();
-            sc.nextLine();
+            try {
+                // Leemos la línea completa y la convertimos
+                opcion = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                opcion = -1; // Fuerza el default en el switch
+            }
 
             switch (opcion) {
                 //TODO
@@ -92,8 +104,12 @@ public class Menu {
             System.out.println("1. Vender Coche");
             System.out.println("0. Volver");
 
-            opcion = sc.nextInt();
-            sc.nextLine();
+            try {
+                // Leemos la línea completa y la convertimos
+                opcion = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                opcion = -1; // Fuerza el default en el switch
+            }
 
             switch (opcion) {
                 //TODO
@@ -114,8 +130,12 @@ public class Menu {
             System.out.println("4. Coste actual de Coche");
             System.out.println("0. Volver");
 
-            opcion = sc.nextInt();
-            sc.nextLine();
+            try {
+                // Leemos la línea completa y la convertimos
+                opcion = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                opcion = -1; // Fuerza el default en el switch
+            }
 
             switch (opcion) {
                 case 1 -> menuStockVentasConcesionario(true);
@@ -152,7 +172,12 @@ public class Menu {
         System.out.println(mecanicos);
         while (menu) {
             System.out.println("Inserta la ID del Mecanico. Inserte 0 para cancelar:");
-            id = Integer.parseInt(sc.nextLine());
+            try {
+                // Leemos la línea completa y la convertimos
+                id = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                id = -1; // Fuerza el default en el switch
+            }
             int finalId = id;
             if (mecanicos.stream().anyMatch(mecanico-> mecanico.getId()== finalId)||finalId==0) menu = false;
         }
@@ -167,7 +192,12 @@ public class Menu {
         System.out.println(concesionarios);
         while (menu) {
             System.out.println("Inserta la ID del Concesionario. Inserte 0 para cancelar:");
-            id = Integer.parseInt(sc.nextLine());
+            try {
+                // Leemos la línea completa y la convertimos
+                id = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                id = -1; // Fuerza el default en el switch
+            }
             int finalId = id;
             if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)||finalId==0) menu = false;
         }
