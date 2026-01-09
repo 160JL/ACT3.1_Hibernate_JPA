@@ -10,6 +10,7 @@ import java.util.Set;
 public class Coche {
 
     @Id
+    @Column(length = 7)
     private String matricula;
     private String marca;
     private String modelo;

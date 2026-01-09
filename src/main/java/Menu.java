@@ -32,7 +32,6 @@ public class Menu {
 
             switch (opcion) {
                 case 1 -> Servicios.iniciarEntityManager();
-                //TODO
                 case 2 -> menuStock();
                 //TODO
                 case 3 -> menuTaller();
@@ -61,14 +60,23 @@ public class Menu {
             }
 
             switch (opcion) {
-                //TODO
-                case 1 -> Servicios.altaConcesionario();
-                //TODO
+                case 1 -> menuAltaConcesionario();
                 case 2 -> Servicios.altaCoche();
                 case 0 -> {}
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
+    }
+
+    private static void menuAltaConcesionario() {
+        System.out.println("Alta de concesionario");
+        System.out.println("Nombre del Concesionario: (Deja en blanco para cancelar)");
+        String nombre = sc.nextLine();
+        if (nombre.trim().isBlank()) return;
+        System.out.println("Dirección del Concesionario: (Deja en blanco para cancelar)");
+        String direccion = sc.nextLine();
+        if (direccion.trim().isBlank()) return;
+        Servicios.altaConcesionario(nombre,direccion);
     }
 
     private static void menuTaller() {
