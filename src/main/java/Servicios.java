@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 public class Servicios {
     public static void iniciarEntityManager() {
@@ -148,73 +147,54 @@ public class Servicios {
         System.out.println("Concesionario Creado con Exito");
     }
 
-    public static void altaCoche() {
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Alta de coche");
-
+    public static boolean altaCoche(String matricula) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
         EntityManager em = emf.createEntityManager();
 
-        System.out.println("Introduce una matricula: (Deja en blanco para cancelar)");
-        String matricula = null;
         Coche newCoche = null;
         while (true){
             try {
                 em.getTransaction().begin();
-                matricula = sc.nextLine();
+                assert matricula != null;
                 if (!matricula.matches("^[0-9]{4}[A-Za-z]{3}$")){
                     throw new NumberFormatException();
                 }
                 newCoche = new Coche(matricula, null, null, 0, null);
                 em.persist(newCoche);
                 em.getTransaction().commit();
-                break;
+                return true;
             } catch (EntityExistsException | ConstraintViolationException | RollbackException e){
                 System.out.println("Ya existe esta matricula");
+                return false;
             } catch (NumberFormatException e){
-                if(matricula != null&&matricula.trim().isBlank()) return;
                 System.out.println("Formato de matricula incorrecto (####***)");
+                return false;
             } finally {
                 if (em.getTransaction().isActive()){
                     em.getTransaction().rollback();
                 }
             }
         }
+    }
+
+    public static void meh(String matricula, String marca, String modelo, Double precioBase, Concesionario concesionario) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
+        EntityManager em = emf.createEntityManager();
+
         em.getTransaction().begin();
-        System.out.println("Introduce la marca:");
-        String marca = sc.nextLine();
+
+        List<Coche> coches = em.createQuery("SELECT c FROM Coche c WHERE c.matricula = :matricula").setParameter("matricula",matricula).getResultList();
+
+        Coche newCoche = coches.getFirst();
+
         newCoche.setMarca(marca);
-        System.out.println("Introduce el modelo:");
-        String modelo = sc.nextLine();
+
         newCoche.setModelo(modelo);
-        double precioBase = 0.0;
-        while (true) {
-            System.out.println("Introduce el precio base:");
-            try {
-                precioBase = Double.parseDouble(sc.nextLine().trim());
-            } catch (NumberFormatException e) {
-                precioBase = -1;
-                System.out.println("--- ERROR: Numero no válido ---");
-            }
-            if (precioBase>=0) break;
-        }
+
         newCoche.setPrecio_base(precioBase);
-        int id = 0;
-        List<Concesionario> concesionarios = Servicios.listadoConcesionarios();
-        System.out.println(concesionarios);
-        while (true) {
-            System.out.println("Inserta la ID del Concesionario.");
-            try {
-                // Leemos la línea completa y la convertimos
-                id = Integer.parseInt(sc.nextLine().trim());
-            } catch (NumberFormatException e) {
-                id = -1; // Fuerza el default en el switch
-            }
-            int finalId = id;
-            if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)) break;
-        }
-        int finalId = id;
-        newCoche.setConcesionario(concesionarios.stream().filter(concesionario-> concesionario.getId()== finalId).findFirst().orElse(null));
+
+        newCoche.setConcesionario(concesionario);
+
         em.getTransaction().commit();
     }
 

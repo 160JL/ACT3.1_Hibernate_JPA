@@ -1,3 +1,6 @@
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import model.Coche;
 import model.Concesionario;
 import model.Mecanico;
@@ -61,11 +64,59 @@ public class Menu {
 
             switch (opcion) {
                 case 1 -> menuAltaConcesionario();
-                case 2 -> Servicios.altaCoche();
+                case 2 -> menuAltaCoche();
                 case 0 -> {}
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
+    }
+
+    private static void menuAltaCoche() {Scanner sc = new Scanner(System.in);
+        System.out.println("Alta de coche\n");
+
+        String matricula = null;
+        boolean exito = false;
+        do {
+            System.out.println("Introduce una matricula: (Deja en blanco para cancelar)");
+            matricula = sc.nextLine();
+            if(matricula != null&&matricula.trim().isBlank()) return;
+            assert matricula != null;
+            exito=Servicios.altaCoche(matricula);
+        } while (!exito);
+
+        int id = 0;
+        List<Concesionario> concesionarios = Servicios.listadoConcesionarios();
+        System.out.println(concesionarios);
+        while (true) {
+            System.out.println("Inserta la ID del Concesionario.");
+            try {
+                // Leemos la línea completa y la convertimos
+                id = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                id = -1; // Fuerza el default en el switch
+            }
+            int finalId = id;
+            if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)) break;
+        }
+        System.out.println("Introduce la marca:");
+        String marca = sc.nextLine();
+        System.out.println("Introduce el modelo:");
+        String modelo = sc.nextLine();
+        double precioBase = 0.0;
+        while (true) {
+            System.out.println("Introduce el precio base:");
+            try {
+                precioBase = Double.parseDouble(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                precioBase = -1;
+                System.out.println("--- ERROR: Numero no válido ---");
+            }
+            if (precioBase>=0) break;
+        }
+        int finalId = id;
+        Concesionario concesionariont = concesionarios.stream().filter(concesionario-> concesionario.getId()== finalId).findFirst().orElse(null);
+        Servicios.meh(matricula,marca,modelo,precioBase,concesionariont);
+
     }
 
     private static void menuAltaConcesionario() {
