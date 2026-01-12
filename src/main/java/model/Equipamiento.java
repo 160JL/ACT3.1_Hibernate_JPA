@@ -44,4 +44,12 @@ public class Equipamiento {
     public void setCoste(double coste) {
         this.coste = coste;
     }
+
+    @Override
+    public String toString() {
+        return "\nEquipamiento:" +
+                "\n   id= " + id +
+                "\n   nombre= " + nombre +
+                "\n   coste= " + coste;
+    }
 }

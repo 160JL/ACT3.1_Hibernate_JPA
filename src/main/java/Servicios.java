@@ -203,12 +203,54 @@ public class Servicios {
         }
     }
 
-    public static void instalarExtra() {
-        System.out.println("Extra instalado y precio actualizado");
+    public static void instalarExtra(String matricula, long id) {
+        try (EntityManager em = em()) {
+
+            em.getTransaction().begin();
+
+            List<Coche> coches = em.createQuery("SELECT c FROM Coche c WHERE c.matricula = :matricula").setParameter("matricula", matricula).getResultList();
+
+            Coche coche = coches.getFirst();
+
+            List<Equipamiento> equipamientos = em.createQuery("SELECT e FROM Equipamiento e WHERE e.id = :id").setParameter("id", id).getResultList();
+
+            Equipamiento equipamiento = equipamientos.getFirst();
+
+            if (coche.getEquipamientos().contains(equipamiento)) {
+                System.out.println("El coche ya tiene ese equipamiento");
+            } else {
+                coche.getEquipamientos().add(equipamiento);
+                System.out.println("Equipamiento instalado");
+                costeActualCoche(coche);
+            }
+
+            em.getTransaction().commit();
+        }
     }
 
-    public static void registrarReparacion() {
-        System.out.println("Reparación registrada");
+    public static void registrarReparacion(String matricula, long id, LocalDateTime fecha, double coste, String descripcion) {
+
+        try (EntityManager em = em()) {
+
+            em.getTransaction().begin();
+
+            List<Coche> coches = em.createQuery("SELECT c FROM Coche c WHERE c.matricula = :matricula").setParameter("matricula", matricula).getResultList();
+
+            Coche coche = coches.getFirst();
+
+            List<Mecanico> mecanicos = em.createQuery("SELECT m FROM Mecanico m WHERE m.id = :id").setParameter("id", id).getResultList();
+
+            Mecanico mecanico = mecanicos.getFirst();
+
+            Reparacion reparacion = new Reparacion(fecha,coste,descripcion,coche,mecanico);
+
+            em.persist(reparacion);
+
+            em.getTransaction().commit();
+
+            System.out.println("Reparación registrada");
+        }
+
     }
 
     public static void venderCoche() {
@@ -273,12 +315,15 @@ public class Servicios {
 
             double costeActual = 0.0;
 
-            List<Venta> ventas = em.createQuery("SELECT v FROM Venta v").getResultList();
-            for (Venta venta : ventas) {
-                if (Objects.equals(venta.getCoche().getMatricula(), coche.getMatricula())) {
-                    costeActual = costeActual + venta.getPrecio_final();
+            if (coche.getPropietario()!=null) {
+                List<Venta> ventas = em.createQuery("SELECT v FROM Venta v").getResultList();
+                for (Venta venta : ventas) {
+                    if (Objects.equals(venta.getCoche().getMatricula(), coche.getMatricula())) {
+                        costeActual = costeActual + venta.getPrecio_final();
+                        break;
+                    }
                 }
-            }
+            } else {costeActual = costeActual + coche.getPrecio_base();}
 
             List<Reparacion> reparacions = em.createQuery("SELECT r FROM Reparacion r").getResultList();
             for (Reparacion reparacion : reparacions) {
@@ -313,6 +358,18 @@ public class Servicios {
     public static List<Coche> listadoCochesPropietarios() {
         try (EntityManager em = em()) {
             return em.createQuery("SELECT c FROM Coche c JOIN FETCH c.propietario LEFT JOIN FETCH c.equipamientos").getResultList();
+        }
+    }
+
+    public static List<Coche> listadoCoches() {
+        try (EntityManager em = em()) {
+            return em.createQuery("SELECT c FROM Coche c").getResultList();
+        }
+    }
+
+    public static List<Equipamiento> listadoEquipamientos() {
+        try (EntityManager em = em()) {
+            return em.createQuery("SELECT e FROM Equipamiento e").getResultList();
         }
     }
 }

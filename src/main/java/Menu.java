@@ -1,10 +1,10 @@
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 import model.Coche;
 import model.Concesionario;
+import model.Equipamiento;
 import model.Mecanico;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -36,7 +36,6 @@ public class Menu {
             switch (opcion) {
                 case 1 -> Servicios.iniciarEntityManager();
                 case 2 -> menuStock();
-                //TODO
                 case 3 -> menuTaller();
                 //TODO
                 case 4 -> menuVentas();
@@ -146,14 +145,130 @@ public class Menu {
             }
 
             switch (opcion) {
-                //TODO
-                case 1 -> Servicios.instalarExtra();
-                //TODO
-                case 2 -> Servicios.registrarReparacion();
+                case 1 -> menuInstalarExtra();
+                case 2 -> menuRegistrarReparacion();
                 case 0 -> {}
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
+    }
+
+    private static void menuRegistrarReparacion() {
+        boolean menu = true;
+        String matricula = null;
+        List<Coche> coches = Servicios.listadoCoches();
+        System.out.println(coches);
+        while (menu) {
+            System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
+            matricula = sc.nextLine();
+            String finalId = matricula;
+            Coche cochent = coches.stream().filter(coche-> Objects.equals(coche.getMatricula(), finalId.trim())).findFirst().orElse(null);
+            if (cochent!=null||finalId.trim().equals("0")) menu = false;
+        }
+        if (matricula.trim().equals("0")) return;
+        menu = true;
+        int id = 0;
+        List<Mecanico> mecanicos = Servicios.listadoMecanicos();
+        System.out.println(mecanicos);
+        while (menu) {
+            System.out.println("Inserta la ID del Mecánico. Inserte 0 para cancelar:");
+            try {
+                id = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                id = -1;
+            }
+            int finalId = id;
+            if (mecanicos.stream().anyMatch(mecanico-> mecanico.getId()== finalId)||finalId==0) menu = false;
+        }
+        if (id == 0) return;
+        System.out.println("¿Quieres insertar una fecha?");
+        System.out.println("1. Si");
+        System.out.println("2. No");
+        int opcion = 0;
+        LocalDateTime fecha = null;
+        try {
+            opcion = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            opcion = -1;
+        }
+        switch (opcion) {
+            case 1 -> {
+                System.out.println("Introducida fecha actual.");
+                fecha = LocalDateTime.now();}
+            default -> {}
+        }
+        System.out.println("¿Quieres insertar un coste?");
+        System.out.println("1. Si");
+        System.out.println("2. No");
+        double coste = 0;
+        try {
+            opcion = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            opcion = -1;
+        }
+        switch (opcion) {
+            case 1 -> {
+                while (true) {
+                    System.out.println("Introduce el coste:");
+                    try {
+                        coste = Double.parseDouble(sc.nextLine().trim());
+                    } catch (NumberFormatException e) {
+                        coste = -1;
+                        System.out.println("--- ERROR: Numero no válido ---");
+                    }
+                    if (coste>0) break;
+                }
+            }
+            default -> {}
+        }
+        System.out.println("¿Quieres insertar una descripción?");
+        System.out.println("1. Si");
+        System.out.println("2. No");
+        String descripcion = null;
+        try {
+            opcion = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            opcion = -1;
+        }
+        switch (opcion) {
+            case 1 -> {
+                System.out.println("Inserta Descripción:");;
+                descripcion= sc.nextLine();}
+            default -> {}
+        }
+
+        Servicios.registrarReparacion(matricula, id, fecha, coste, descripcion);
+    }
+
+    private static void menuInstalarExtra() {
+        boolean menu = true;
+        String matricula = null;
+        List<Coche> coches = Servicios.listadoCoches();
+        System.out.println(coches);
+        while (menu) {
+            System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
+            matricula = sc.nextLine();
+            String finalId = matricula;
+            Coche cochent = coches.stream().filter(coche-> Objects.equals(coche.getMatricula(), finalId.trim())).findFirst().orElse(null);
+            if (cochent!=null||finalId.trim().equals("0")) menu = false;
+        }
+        if (matricula.trim().equals("0")) return;
+        menu = true;
+        int id = 0;
+        List<Equipamiento> equipamientos = Servicios.listadoEquipamientos();
+        System.out.println(equipamientos);
+        while (menu) {
+            System.out.println("Inserta la ID del Equipamiento. Inserte 0 para cancelar:");
+            try {
+                id = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                id = -1;
+            }
+            int finalId = id;
+            if (equipamientos.stream().anyMatch(equipamiento-> equipamiento.getId()== finalId)||finalId==0) menu = false;
+        }
+        if (id == 0) return;
+        Servicios.instalarExtra(matricula, id);
     }
 
     private static void menuVentas() {
@@ -252,10 +367,9 @@ public class Menu {
         while (menu) {
             System.out.println("Inserta la ID del Concesionario. Inserte 0 para cancelar:");
             try {
-                // Leemos la línea completa y la convertimos
                 id = Integer.parseInt(sc.nextLine().trim());
             } catch (NumberFormatException e) {
-                id = -1; // Fuerza el default en el switch
+                id = -1;
             }
             int finalId = id;
             if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)||finalId==0) menu = false;
