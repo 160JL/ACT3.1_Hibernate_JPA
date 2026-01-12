@@ -112,7 +112,7 @@ public class Servicios {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
-                em.close();
+                em.getEntityManagerFactory().close();
             }
         } catch (Exception e) {
             System.out.println("--- ERROR: La base de datos no existe ---");
@@ -135,7 +135,7 @@ public class Servicios {
         em.createQuery("DELETE FROM Concesionario").executeUpdate();
 
         em.getTransaction().commit();
-        em.close();
+        em.getEntityManagerFactory().close();
     }
 
     public static void altaConcesionario(String nombre, String direccion) {
@@ -148,7 +148,7 @@ public class Servicios {
 
         em.persist(concesionario);
         em.getTransaction().commit();
-        em.close();
+        em.getEntityManagerFactory().close();
         System.out.println("Concesionario Creado con Exito");
     }
 
