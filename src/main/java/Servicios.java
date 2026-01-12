@@ -8,10 +8,18 @@ import java.util.List;
 import java.util.Objects;
 
 public class Servicios {
-    public static void iniciarEntityManager() {
+    private static EntityManager em() {
         try {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
-            EntityManager em = emf.createEntityManager();
+            return emf.createEntityManager();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void iniciarEntityManager() {
+        try {
+            EntityManager em = em();
 
             System.out.println("Conexión establecida");
 
@@ -105,7 +113,6 @@ public class Servicios {
                 throw new RuntimeException(e);
             } finally {
                 em.close();
-                emf.close();
             }
         } catch (Exception e) {
             System.out.println("--- ERROR: La base de datos no existe ---");
@@ -114,8 +121,7 @@ public class Servicios {
     }
 
     private static void borrarDatos() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = em();
 
         em.getTransaction().begin();
 
@@ -130,7 +136,6 @@ public class Servicios {
 
         em.getTransaction().commit();
         em.close();
-        emf.close();
     }
 
     public static void altaConcesionario(String nombre, String direccion) {
@@ -148,54 +153,54 @@ public class Servicios {
     }
 
     public static boolean altaCoche(String matricula) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
-        EntityManager em = emf.createEntityManager();
+        try (EntityManager em = em()) {
 
-        Coche newCoche = null;
-        while (true){
-            try {
-                em.getTransaction().begin();
-                assert matricula != null;
-                if (!matricula.matches("^[0-9]{4}[A-Za-z]{3}$")){
-                    throw new NumberFormatException();
-                }
-                newCoche = new Coche(matricula, null, null, 0, null);
-                em.persist(newCoche);
-                em.getTransaction().commit();
-                return true;
-            } catch (EntityExistsException | ConstraintViolationException | RollbackException e){
-                System.out.println("Ya existe esta matricula");
-                return false;
-            } catch (NumberFormatException e){
-                System.out.println("Formato de matricula incorrecto (####***)");
-                return false;
-            } finally {
-                if (em.getTransaction().isActive()){
-                    em.getTransaction().rollback();
+            Coche newCoche = null;
+            while (true) {
+                try {
+                    em.getTransaction().begin();
+                    assert matricula != null;
+                    if (!matricula.matches("^[0-9]{4}[A-Za-z]{3}$")) {
+                        throw new NumberFormatException();
+                    }
+                    newCoche = new Coche(matricula, null, null, 0, null);
+                    em.persist(newCoche);
+                    em.getTransaction().commit();
+                    return true;
+                } catch (EntityExistsException | ConstraintViolationException | RollbackException e) {
+                    System.out.println("Ya existe esta matricula");
+                    return false;
+                } catch (NumberFormatException e) {
+                    System.out.println("Formato de matricula incorrecto (####***)");
+                    return false;
+                } finally {
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
                 }
             }
         }
     }
 
     public static void meh(String matricula, String marca, String modelo, Double precioBase, Concesionario concesionario) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
-        EntityManager em = emf.createEntityManager();
+        try (EntityManager em = em()) {
 
-        em.getTransaction().begin();
+            em.getTransaction().begin();
 
-        List<Coche> coches = em.createQuery("SELECT c FROM Coche c WHERE c.matricula = :matricula").setParameter("matricula",matricula).getResultList();
+            List<Coche> coches = em.createQuery("SELECT c FROM Coche c WHERE c.matricula = :matricula").setParameter("matricula", matricula).getResultList();
 
-        Coche newCoche = coches.getFirst();
+            Coche newCoche = coches.getFirst();
 
-        newCoche.setMarca(marca);
+            newCoche.setMarca(marca);
 
-        newCoche.setModelo(modelo);
+            newCoche.setModelo(modelo);
 
-        newCoche.setPrecio_base(precioBase);
+            newCoche.setPrecio_base(precioBase);
 
-        newCoche.setConcesionario(concesionario);
+            newCoche.setConcesionario(concesionario);
 
-        em.getTransaction().commit();
+            em.getTransaction().commit();
+        }
     }
 
     public static void instalarExtra() {
@@ -213,9 +218,8 @@ public class Servicios {
     public static void stockConcesionario(int id) {
         System.out.println("Listado de stock");
 
-        EntityManager em;
-        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
-            em = emf.createEntityManager();
+        try (EntityManager em = em()) {
+
             em.getTransaction().begin();
 
             List<Coche> coches = em.createQuery("SELECT c FROM Coche c").getResultList();
@@ -232,9 +236,8 @@ public class Servicios {
     public static void historialMecanico(int id) {
         System.out.println("Historial del mecánico");
 
-        EntityManager em;
-        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
-            em = emf.createEntityManager();
+
+        try (EntityManager em = em()) {
             em.getTransaction().begin();
 
             List<Reparacion> reparacions = em.createQuery("SELECT r FROM Reparacion r").getResultList();
@@ -250,9 +253,8 @@ public class Servicios {
 
     public static void ventasPorConcesionario(int id) {
         System.out.println("Ventas del concesionario");
-        EntityManager em;
-        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
-            em = emf.createEntityManager();
+
+        try (EntityManager em = em()) {
             em.getTransaction().begin();
 
             List<Venta> ventas = em.createQuery("SELECT v FROM Venta v").getResultList();
@@ -266,9 +268,7 @@ public class Servicios {
 
     public static void costeActualCoche(Coche coche) {
         System.out.println("Coste total del coche");
-        EntityManager em;
-        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
-            em = emf.createEntityManager();
+        try (EntityManager em = em();) {
             em.getTransaction().begin();
 
             double costeActual = 0.0;
@@ -298,26 +298,20 @@ public class Servicios {
     }
 
     public static List<Concesionario> listadoConcesionarios() {
-        EntityManager em;
-        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
-            em = emf.createEntityManager();
+        try (EntityManager em = em()) {
             return em.createQuery("SELECT c FROM Concesionario c").getResultList();
         }
 
     }
 
     public static List<Mecanico> listadoMecanicos() {
-        EntityManager em;
-        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
-            em = emf.createEntityManager();
+        try (EntityManager em = em()) {
             return em.createQuery("SELECT m FROM Mecanico m").getResultList();
         }
     }
 
     public static List<Coche> listadoCochesPropietarios() {
-        EntityManager em;
-        try (EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia")) {
-            em = emf.createEntityManager();
+        try (EntityManager em = em()) {
             return em.createQuery("SELECT c FROM Coche c JOIN FETCH c.propietario LEFT JOIN FETCH c.equipamientos").getResultList();
         }
     }
