@@ -1,10 +1,6 @@
-import model.Coche;
-import model.Concesionario;
-import model.Equipamiento;
-import model.Mecanico;
+import model.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -15,7 +11,6 @@ public class Menu {
 
     public static void mostrarMenuPrincipal() {
         int opcion;
-
         do {
             System.out.println("\n=== MENÚ PRINCIPAL ===");
             System.out.println("1. Configuración y Carga de Datos");
@@ -37,7 +32,6 @@ public class Menu {
                 case 1 -> Servicios.iniciarEntityManager();
                 case 2 -> menuStock();
                 case 3 -> menuTaller();
-                //TODO
                 case 4 -> menuVentas();
                 case 5 -> menuConsultas();
                 case 0 -> System.out.println("Saliendo del sistema...");
@@ -64,13 +58,15 @@ public class Menu {
             switch (opcion) {
                 case 1 -> menuAltaConcesionario();
                 case 2 -> menuAltaCoche();
-                case 0 -> {}
+                case 0 -> {
+                }
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
     }
 
-    private static void menuAltaCoche() {Scanner sc = new Scanner(System.in);
+    private static void menuAltaCoche() {
+        Scanner sc = new Scanner(System.in);
         System.out.println("Alta de coche\n");
 
         String matricula = null;
@@ -78,9 +74,9 @@ public class Menu {
         do {
             System.out.println("Introduce una matricula: (Deja en blanco para cancelar)");
             matricula = sc.nextLine();
-            if(matricula != null&&matricula.trim().isBlank()) return;
+            if (matricula != null && matricula.trim().isBlank()) return;
             assert matricula != null;
-            exito=Servicios.altaCoche(matricula);
+            exito = Servicios.altaCoche(matricula);
         } while (!exito);
 
         int id = 0;
@@ -95,7 +91,7 @@ public class Menu {
                 id = -1; // Fuerza el default en el switch
             }
             int finalId = id;
-            if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)) break;
+            if (concesionarios.stream().anyMatch(concesionario -> concesionario.getId() == finalId)) break;
         }
         System.out.println("Introduce la marca:");
         String marca = sc.nextLine();
@@ -110,11 +106,11 @@ public class Menu {
                 precioBase = -1;
                 System.out.println("--- ERROR: Numero no válido ---");
             }
-            if (precioBase>=0) break;
+            if (precioBase >= 0) break;
         }
         int finalId = id;
-        Concesionario concesionariont = concesionarios.stream().filter(concesionario-> concesionario.getId()== finalId).findFirst().orElse(null);
-        Servicios.meh(matricula,marca,modelo,precioBase,concesionariont);
+        Concesionario concesionariont = concesionarios.stream().filter(concesionario -> concesionario.getId() == finalId).findFirst().orElse(null);
+        Servicios.altaCoche(matricula, marca, modelo, precioBase, concesionariont);
 
     }
 
@@ -126,7 +122,7 @@ public class Menu {
         System.out.println("Dirección del Concesionario: (Deja en blanco para cancelar)");
         String direccion = sc.nextLine();
         if (direccion.trim().isBlank()) return;
-        Servicios.altaConcesionario(nombre,direccion);
+        Servicios.altaConcesionario(nombre, direccion);
     }
 
     private static void menuTaller() {
@@ -147,7 +143,8 @@ public class Menu {
             switch (opcion) {
                 case 1 -> menuInstalarExtra();
                 case 2 -> menuRegistrarReparacion();
-                case 0 -> {}
+                case 0 -> {
+                }
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
@@ -162,8 +159,8 @@ public class Menu {
             System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
             matricula = sc.nextLine();
             String finalId = matricula;
-            Coche cochent = coches.stream().filter(coche-> Objects.equals(coche.getMatricula(), finalId.trim())).findFirst().orElse(null);
-            if (cochent!=null||finalId.trim().equals("0")) menu = false;
+            Coche cochent = coches.stream().filter(coche -> Objects.equals(coche.getMatricula(), finalId.trim())).findFirst().orElse(null);
+            if (cochent != null || finalId.trim().equals("0")) menu = false;
         }
         if (matricula.trim().equals("0")) return;
         menu = true;
@@ -178,7 +175,7 @@ public class Menu {
                 id = -1;
             }
             int finalId = id;
-            if (mecanicos.stream().anyMatch(mecanico-> mecanico.getId()== finalId)||finalId==0) menu = false;
+            if (mecanicos.stream().anyMatch(mecanico -> mecanico.getId() == finalId) || finalId == 0) menu = false;
         }
         if (id == 0) return;
         System.out.println("¿Quieres insertar una fecha?");
@@ -194,8 +191,10 @@ public class Menu {
         switch (opcion) {
             case 1 -> {
                 System.out.println("Introducida fecha actual.");
-                fecha = LocalDateTime.now();}
-            default -> {}
+                fecha = LocalDateTime.now();
+            }
+            default -> {
+            }
         }
         System.out.println("¿Quieres insertar un coste?");
         System.out.println("1. Si");
@@ -216,10 +215,11 @@ public class Menu {
                         coste = -1;
                         System.out.println("--- ERROR: Numero no válido ---");
                     }
-                    if (coste>0) break;
+                    if (coste > 0) break;
                 }
             }
-            default -> {}
+            default -> {
+            }
         }
         System.out.println("¿Quieres insertar una descripción?");
         System.out.println("1. Si");
@@ -232,9 +232,12 @@ public class Menu {
         }
         switch (opcion) {
             case 1 -> {
-                System.out.println("Inserta Descripción:");;
-                descripcion= sc.nextLine();}
-            default -> {}
+                System.out.println("Inserta Descripción:");
+                ;
+                descripcion = sc.nextLine();
+            }
+            default -> {
+            }
         }
 
         Servicios.registrarReparacion(matricula, id, fecha, coste, descripcion);
@@ -248,13 +251,11 @@ public class Menu {
         while (menu) {
             System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
             matricula = sc.nextLine();
-            String finalId = matricula;
-            Coche cochent = coches.stream().filter(coche-> Objects.equals(coche.getMatricula(), finalId.trim())).findFirst().orElse(null);
-            if (cochent!=null||finalId.trim().equals("0")) menu = false;
+            if (matricula.trim().equals("0") || Servicios.existeCoche(matricula)) menu = false;
         }
         if (matricula.trim().equals("0")) return;
         menu = true;
-        int id = 0;
+        long id = 0;
         List<Equipamiento> equipamientos = Servicios.listadoEquipamientos();
         System.out.println(equipamientos);
         while (menu) {
@@ -264,8 +265,7 @@ public class Menu {
             } catch (NumberFormatException e) {
                 id = -1;
             }
-            int finalId = id;
-            if (equipamientos.stream().anyMatch(equipamiento-> equipamiento.getId()== finalId)||finalId==0) menu = false;
+            if (id == 0 || Servicios.existeEquipamiento(id)) menu = false;
         }
         if (id == 0) return;
         Servicios.instalarExtra(matricula, id);
@@ -286,12 +286,115 @@ public class Menu {
             }
 
             switch (opcion) {
-                //TODO
-                case 1 -> Servicios.venderCoche();
-                case 0 -> {}
+                case 1 -> menuVenderCoche();
+                case 0 -> {
+                }
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
+    }
+
+    private static void menuVenderCoche() {
+        int opcion;
+        do {
+            System.out.println("\n--- ¿Quieres crear un nuevo propietario? ---");
+            System.out.println("1. Si");
+            System.out.println("2. No");
+            System.out.println("0. Volver");
+
+            try {
+                // Leemos la línea completa y la convertimos
+                opcion = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                opcion = -1; // Fuerza el default en el switch
+            }
+
+            switch (opcion) {
+                case 1 -> {
+                    menuVentaCoche(menuNuevoPropietario());
+                }
+                case 2 -> {
+                    menuVentaCoche(0);
+                    return;
+                }
+                case 0 -> {
+                }
+                default -> System.out.println("Opción inválida");
+            }
+        } while (opcion != 0);
+    }
+
+    private static void menuVentaCoche(long id) {
+        if (id == -1) return;
+        if (id == 0) id = menuSelectPropietario();
+
+        long idConcesionario = menuStockVentasConcesionario(0);
+        if (idConcesionario == 0) return;
+
+        List<Coche> coches = Servicios.stockConcesionario(idConcesionario);
+        System.out.println(coches);
+        String matricula = null;
+        matricula = getIdCoche();
+        if (matricula == null) return;
+
+        double precio = 0;
+        do {
+            System.out.println("Indica el precio de venta:");
+            try {
+                precio = Double.parseDouble(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                precio = -1;
+                System.out.println("--- ERROR: Numero no válido ---");
+            }
+        } while (!(precio > 0));
+
+        Servicios.venderCoche(id, idConcesionario, matricula, precio);
+
+    }
+
+    private static String getIdCoche() {
+        String matricula = null;
+        boolean menu = true;
+        while (menu) {
+            System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
+            matricula = sc.nextLine();
+            boolean gucci = false;
+            if (!matricula.trim().equals("0") && Servicios.existeCoche(matricula)) {
+                if (Servicios.cochePropietario(matricula)) System.out.println("--- El coche ya tiene propietario ---");
+                else gucci = true;
+            } else if (matricula.trim().equals("0")) gucci = true;
+            else System.out.println("--- El coche no existe ---");
+
+            if (gucci) menu = false;
+        }
+        if (matricula.trim().equals("0")) return null;
+        return matricula;
+    }
+
+    private static long menuSelectPropietario() {
+        List<Propietario> propietarios = Servicios.listadoPropietarios();
+        boolean menu = true;
+        long id = 0;
+        System.out.println(propietarios);
+        while (menu) {
+            System.out.println("Inserta la ID del Propietario:");
+            try {
+                // Leemos la línea completa y la convertimos
+                id = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                id = -1; // Fuerza el default en el switch
+            }
+            if (Servicios.existePropietario(id)) menu = false;
+        }
+        return id;
+    }
+
+    private static long menuNuevoPropietario() {
+        System.out.println("Introduce el DNI del Propietario:");
+        String dni = sc.nextLine();
+        System.out.println("Introduce el nombre del propietario:");
+        String nombre = sc.nextLine();
+        return Servicios.nuevoPropietario(dni, nombre);
     }
 
     private static void menuConsultas() {
@@ -312,36 +415,28 @@ public class Menu {
             }
 
             switch (opcion) {
-                case 1 -> menuStockVentasConcesionario(true);
+                case 1 -> menuStockVentasConcesionario(1);
                 case 2 -> menuHistorialMecanico();
-                case 3 -> menuStockVentasConcesionario(false);
+                case 3 -> menuStockVentasConcesionario(2);
                 case 4 -> menuCosteActualCoche();
-                case 0 -> {}
+                case 0 -> {
+                }
                 default -> System.out.println("Opción inválida");
             }
         } while (opcion != 0);
     }
 
     private static void menuCosteActualCoche() {
-        boolean menu = true;
         String id = null;
-        Coche cochent = null;
         List<Coche> coches = Servicios.listadoCochesPropietarios();
         System.out.println(coches);
-        while (menu) {
-            System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
-            id = sc.nextLine();
-            String finalId = id;
-            cochent = coches.stream().filter(coche-> Objects.equals(coche.getMatricula(), finalId.trim())).findFirst().orElse(null);
-            if (cochent!=null||finalId.trim().equals("0")) menu = false;
-        }
-        if (id.trim().equals("0")) return;
-        Servicios.costeActualCoche(cochent);
+        id = getIdCoche();
+        Servicios.costeActualCoche(id);
     }
 
     private static void menuHistorialMecanico() {
         boolean menu = true;
-        int id = 0;
+        long id = 0;
         List<Mecanico> mecanicos = Servicios.listadoMecanicos();
         System.out.println(mecanicos);
         while (menu) {
@@ -352,16 +447,15 @@ public class Menu {
             } catch (NumberFormatException e) {
                 id = -1; // Fuerza el default en el switch
             }
-            int finalId = id;
-            if (mecanicos.stream().anyMatch(mecanico-> mecanico.getId()== finalId)||finalId==0) menu = false;
+            if (id == 0 || Servicios.existeMecanico(id)) menu = false;
         }
         if (id == 0) return;
         Servicios.historialMecanico(id);
     }
 
-    private static void menuStockVentasConcesionario(boolean stock) {
+    private static long menuStockVentasConcesionario(int stock) {
         boolean menu = true;
-        int id = 0;
+        long id = 0;
         List<Concesionario> concesionarios = Servicios.listadoConcesionarios();
         System.out.println(concesionarios);
         while (menu) {
@@ -371,10 +465,18 @@ public class Menu {
             } catch (NumberFormatException e) {
                 id = -1;
             }
-            int finalId = id;
-            if (concesionarios.stream().anyMatch(concesionario-> concesionario.getId()== finalId)||finalId==0) menu = false;
+            long finalId = id;
+            if (id == 0 || Servicios.existeConcesionario(id)) menu = false;
         }
-        if (id == 0) return;
-        if (stock) Servicios.stockConcesionario(id); else Servicios.ventasPorConcesionario(id);
+        if (id == 0) return 0;
+        if (stock == 1) {
+            System.out.println(Servicios.stockConcesionario(id));
+            return 0;
+        } else if (stock == 2) {
+            List<Venta> ventas = Servicios.ventasPorConcesionario(id);
+            System.out.println(ventas);
+            System.out.println("Ganancias totales: " + Servicios.ganancias(ventas));
+            return 0;
+        } else return id;
     }
 }
