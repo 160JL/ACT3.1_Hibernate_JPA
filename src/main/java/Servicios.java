@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Objects;
 
 public class Servicios {
+    /**
+     * Crea un entity manager para evitar repetición de codigo
+     * @return EntityManager
+     */
     private static EntityManager em() {
         try {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
@@ -17,6 +21,9 @@ public class Servicios {
         }
     }
 
+    /**
+     * Comprueba que la conexión funciona, borra los datos de la base de datos y carga los datos de ejemplo
+     */
     public static void iniciarEntityManager() {
         try {
             EntityManager em = em();
@@ -25,6 +32,7 @@ public class Servicios {
 
             try {
 
+                //llamada al borrado de los datos
                 borrarDatos();
 
                 em.getTransaction().begin();
@@ -120,6 +128,9 @@ public class Servicios {
         }
     }
 
+    /**
+     * borra todos los datos de la base de datos
+     */
     private static void borrarDatos() {
         EntityManager em = em();
 
@@ -139,69 +150,53 @@ public class Servicios {
         em.getEntityManagerFactory().close();
     }
 
+    /**
+     * Crea un nuevo concesionario y lo guarde an la base de datos
+     * @param nombre nombre del concesionario
+     * @param direccion direccion del concesionario
+     */
     public static void altaConcesionario(String nombre, String direccion) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
-        EntityManager em = emf.createEntityManager();
-
-        em.getTransaction().begin();
-
-        Concesionario concesionario = new Concesionario(nombre,direccion);
-
-        em.persist(concesionario);
-        em.getTransaction().commit();
-        em.getEntityManagerFactory().close();
-        System.out.println("Concesionario Creado con Exito");
-    }
-
-    public static boolean altaCoche(String matricula) {
         try (EntityManager em = em()) {
+            em.getTransaction().begin();
 
-            Coche newCoche = null;
-            while (true) {
-                try {
-                    em.getTransaction().begin();
-                    assert matricula != null;
-                    if (!matricula.matches("^[0-9]{4}[A-Za-z]{3}$")) {
-                        throw new NumberFormatException();
-                    }
-                    newCoche = new Coche(matricula, null, null, 0, null);
-                    em.persist(newCoche);
-                    em.getTransaction().commit();
-                    return true;
-                } catch (EntityExistsException | ConstraintViolationException | RollbackException e) {
-                    System.out.println("Ya existe esta matricula");
-                    return false;
-                } catch (NumberFormatException e) {
-                    System.out.println("Formato de matricula incorrecto (####***)");
-                    return false;
-                } finally {
-                    if (em.getTransaction().isActive()) {
-                        em.getTransaction().rollback();
-                    }
-                }
-            }
+            Concesionario concesionario = new Concesionario(nombre, direccion);
+
+            em.persist(concesionario);
+            em.getTransaction().commit();
+            System.out.println("Concesionario Creado con Exito");
         }
     }
 
-    public static void altaCoche(String matricula, String marca, String modelo, Double precioBase, Concesionario concesionario) {
+    /**
+     * Crea un nuevo coche y lo registra en la base de datos
+     * @param matricula matricula
+     * @param marca marca
+     * @param modelo modelo
+     * @param precioBase precio base
+     * @param idConcesionario ID del concesionario
+     */
+    public static void altaCoche(String matricula, String marca, String modelo, Double precioBase, Long idConcesionario) {
         try (EntityManager em = em()) {
 
             em.getTransaction().begin();
 
-            Coche newCoche = em.find(Coche.class, matricula);
+            Concesionario concesionario = em.find(Concesionario.class, idConcesionario);
 
-            newCoche.setMarca(marca);
+            Coche coche = new Coche(matricula, marca, modelo, precioBase, concesionario);
 
-            newCoche.setModelo(modelo);
-
-            newCoche.setPrecio_base(precioBase);
-
-            newCoche.setConcesionario(concesionario);
+            em.persist(coche);
 
             em.getTransaction().commit();
+
+            System.out.println("Coche creado con exito");
         }
     }
 
+    /**
+     * Instala un extra en un coche
+     * @param matricula matricula del coche
+     * @param id ID del equipamento
+     */
     public static void instalarExtra(String matricula, long id) {
         try (EntityManager em = em()) {
 
@@ -223,6 +218,14 @@ public class Servicios {
         }
     }
 
+    /**
+     * Registra una nueva reparacion
+     * @param matricula matricula del coche
+     * @param id id del mecanico
+     * @param fecha fecha de la reparacion
+     * @param coste coste de la reparacion
+     * @param descripcion descripcion de la reparacion
+     */
     public static void registrarReparacion(String matricula, long id, LocalDateTime fecha, double coste, String descripcion) {
 
         try (EntityManager em = em()) {
@@ -233,7 +236,7 @@ public class Servicios {
 
             Mecanico mecanico = em.find(Mecanico.class, id);
 
-            Reparacion reparacion = new Reparacion(fecha,coste,descripcion,coche,mecanico);
+            Reparacion reparacion = new Reparacion(fecha, coste, descripcion, coche, mecanico);
 
             em.persist(reparacion);
 
@@ -244,7 +247,14 @@ public class Servicios {
 
     }
 
-    public static void venderCoche(Long idPropietario,Long idConcesionario, String matricula, double precio) {
+    /**
+     * procesa la venta de un coche
+     * @param idPropietario ID del propietario
+     * @param idConcesionario ID del concesionario
+     * @param matricula Matricula del coche
+     * @param precio precio final de la venta
+     */
+    public static void venderCoche(Long idPropietario, Long idConcesionario, String matricula, double precio) {
 
         try (EntityManager em = em()) {
             em.getTransaction().begin();
@@ -255,7 +265,7 @@ public class Servicios {
 
             Propietario propietario = em.find(Propietario.class, idPropietario);
 
-            Venta venta = new Venta(LocalDateTime.now(),precio,concesionario,propietario,coche);
+            Venta venta = new Venta(LocalDateTime.now(), precio, concesionario, propietario, coche);
 
             em.persist(venta);
             em.getTransaction().commit();
@@ -264,6 +274,11 @@ public class Servicios {
         }
     }
 
+    /**
+     * recoge la lista de los coches en un concesionario
+     * @param id ID del concesionario
+     * @return Lista de los coches en el concesionario
+     */
     public static List<Coche> stockConcesionario(long id) {
         System.out.println("Listado de stock");
 
@@ -284,7 +299,12 @@ public class Servicios {
 
     }
 
-    public static void historialMecanico(long id) {
+    /**
+     * recoge la lista de las reparaciones de un mecanico
+     * @param id ID del mecanico
+     * @return Lista de las reparaciones del mecanico
+     */
+    public static List<Reparacion> historialMecanico(long id) {
         System.out.println("Historial del mecánico");
 
 
@@ -292,16 +312,23 @@ public class Servicios {
             em.getTransaction().begin();
 
             List<Reparacion> reparacions = em.createQuery("SELECT r FROM Reparacion r").getResultList();
+            List<Reparacion> reparacionList = new ArrayList<>();
             for (Reparacion reparacion : reparacions) {
                 if (reparacion.getMecanico().getId() == id) {
-                    System.out.println(reparacion);
+                    reparacionList.add(reparacion);
                 }
             }
+            return reparacionList;
         }
 
 
     }
 
+    /**
+     * recoge la lista de las ventas en un concesionario
+     * @param id ID del concesionario
+     * @return Lista de las ventas en el concesionario
+     */
     public static List<Venta> ventasPorConcesionario(long id) {
         System.out.println("Ventas del concesionario");
 
@@ -319,6 +346,10 @@ public class Servicios {
         }
     }
 
+    /**
+     * Calcula el coste total de un coche y lo imprime por pantalla
+     * @param matricula Matrícula del coche
+     */
     public static void costeActualCoche(String matricula) {
         System.out.println("Coste total del coche");
         try (EntityManager em = em();) {
@@ -327,7 +358,8 @@ public class Servicios {
             double costeActual = 0.0;
             Coche coche = em.find(Coche.class, matricula);
 
-            if (coche.getPropietario()!=null) {
+            //suma el precio de la venta en caso de que el coche tenga propietario
+            if (coche.getPropietario() != null) {
                 List<Venta> ventas = em.createQuery("SELECT v FROM Venta v").getResultList();
                 for (Venta venta : ventas) {
                     if (Objects.equals(venta.getCoche().getMatricula(), coche.getMatricula())) {
@@ -335,8 +367,13 @@ public class Servicios {
                         break;
                     }
                 }
-            } else {costeActual = costeActual + coche.getPrecio_base();}
+            }
+            // si el coche no tiene propietario usa el precio base
+            else {
+                costeActual = costeActual + coche.getPrecio_base();
+            }
 
+            //suma el coste de todas las reparaciones del coche
             List<Reparacion> reparacions = em.createQuery("SELECT r FROM Reparacion r").getResultList();
             for (Reparacion reparacion : reparacions) {
                 if (Objects.equals(reparacion.getCoche().getMatricula(), coche.getMatricula())) {
@@ -344,6 +381,7 @@ public class Servicios {
                 }
             }
 
+            //cuma el precio de todos los extras del coche
             if (coche.getEquipamientos() != null) {
                 for (Equipamiento equipamiento : coche.getEquipamientos()) {
                     costeActual = costeActual + equipamiento.getCoste();
@@ -354,6 +392,10 @@ public class Servicios {
         }
     }
 
+    /**
+     * Devuelve un listado con todos los concesionarios en la base de datos
+     * @return Lista de los concesionarios
+     */
     public static List<Concesionario> listadoConcesionarios() {
         try (EntityManager em = em()) {
             return em.createQuery("SELECT c FROM Concesionario c").getResultList();
@@ -361,35 +403,59 @@ public class Servicios {
 
     }
 
+    /**
+     * Devuelve un listado con todos los mecanicos en la base de datos
+     * @return Lista de los mecanicos
+     */
     public static List<Mecanico> listadoMecanicos() {
         try (EntityManager em = em()) {
             return em.createQuery("SELECT m FROM Mecanico m").getResultList();
         }
     }
 
+    /**
+     * Devuelve un listado con todos los coches con propietario en la base de datos
+     * @return Lista de los coches
+     */
     public static List<Coche> listadoCochesPropietarios() {
         try (EntityManager em = em()) {
-             List<Coche> listant = em.createQuery("SELECT c FROM Coche c LEFT JOIN FETCH c.equipamientos").getResultList();
-             List<Coche> lista = new ArrayList();
-             for (Coche coche : listant) {
-                 if (coche.getPropietario() != null) {lista.add(coche);}
-             }
-             return lista;
+            List<Coche> listant = em.createQuery("SELECT c FROM Coche c LEFT JOIN FETCH c.equipamientos").getResultList();
+            List<Coche> lista = new ArrayList();
+            for (Coche coche : listant) {
+                if (coche.getPropietario() != null) {
+                    lista.add(coche);
+                }
+            }
+            return lista;
         }
     }
 
+    /**
+     * Devuelve un listado con todos los coches en la base de datos
+     * @return Lista de los coches
+     */
     public static List<Coche> listadoCoches() {
         try (EntityManager em = em()) {
             return em.createQuery("SELECT c FROM Coche c").getResultList();
         }
     }
 
+    /**
+     * Devuelve un listado con todos los equipamientos en la base de datos
+     * @return Lista de los equipamientos
+     */
     public static List<Equipamiento> listadoEquipamientos() {
         try (EntityManager em = em()) {
             return em.createQuery("SELECT e FROM Equipamiento e").getResultList();
         }
     }
 
+    /**
+     * registra un nuevo propietario en la base de datos
+     * @param dni DNI del propietario
+     * @param nombre Nombre del propietario
+     * @return ID del nuevo propietario o -1 en caso de error
+     */
     public static long nuevoPropietario(String dni, String nombre) {
         try (EntityManager em = em()) {
             em.getTransaction().begin();
@@ -404,12 +470,21 @@ public class Servicios {
 
     }
 
+    /**
+     * Devuelve un listado con todos los propietarios en la base de datos
+     * @return Lista de los propietarios
+     */
     public static List<Propietario> listadoPropietarios() {
         try (EntityManager em = em()) {
             return em.createQuery("SELECT p FROM Propietario p").getResultList();
         }
     }
 
+    /**
+     * comprueba si existe un coche
+     * @param matricula Matricula del coche
+     * @return boolean indicando si existe
+     */
     public static boolean existeCoche(String matricula) {
         try (EntityManager em = em()) {
             em.getTransaction().begin();
@@ -417,6 +492,11 @@ public class Servicios {
         }
     }
 
+    /**
+     * comprueba si existe un equipamiento
+     * @param id ID del equipaminento
+     * @return boolean indicando si existe
+     */
     public static boolean existeEquipamiento(Long id) {
         try (EntityManager em = em()) {
             em.getTransaction().begin();
@@ -424,6 +504,11 @@ public class Servicios {
         }
     }
 
+    /**
+     * comprueba si existe un propietario
+     * @param id ID del propietario
+     * @return boolean indicando si existe
+     */
     public static boolean existePropietario(Long id) {
         try (EntityManager em = em()) {
             em.getTransaction().begin();
@@ -431,6 +516,11 @@ public class Servicios {
         }
     }
 
+    /**
+     * comprueba si existe un mecanico
+     * @param id ID del mecanico
+     * @return boolean indicando si existe
+     */
     public static boolean existeMecanico(Long id) {
         try (EntityManager em = em()) {
             em.getTransaction().begin();
@@ -438,6 +528,11 @@ public class Servicios {
         }
     }
 
+    /**
+     * comprueba si existe un concesionario
+     * @param id ID del concesionario
+     * @return boolean indicando si existe
+     */
     public static boolean existeConcesionario(Long id) {
         try (EntityManager em = em()) {
             em.getTransaction().begin();
@@ -445,6 +540,11 @@ public class Servicios {
         }
     }
 
+    /**
+     * Calcula todas las ganancias de un concesionario
+     * @param ventas Lista de ventas
+     * @return Precio total de todas las ventas
+     */
     public static double ganancias(List<Venta> ventas) {
         double ganancias = 0;
         for (var venta : ventas) {
@@ -453,6 +553,11 @@ public class Servicios {
         return ganancias;
     }
 
+    /**
+     * Comprueba si un coche tiene propietario
+     * @param matricula Matrícula del coche
+     * @return Boolean indicando si el coche tiene propietario
+     */
     public static boolean cochePropietario(String matricula) {
         try (EntityManager em = em()) {
             em.getTransaction().begin();

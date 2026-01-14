@@ -9,6 +9,9 @@ public class Menu {
 
     private static final Scanner sc = new Scanner(System.in);
 
+    /**
+     * Menu principal
+     */
     public static void mostrarMenuPrincipal() {
         int opcion;
         do {
@@ -40,6 +43,9 @@ public class Menu {
         } while (opcion != 0);
     }
 
+    /**
+     * Menu de gestion del stock
+     */
     private static void menuStock() {
         int opcion;
         do {
@@ -65,21 +71,27 @@ public class Menu {
         } while (opcion != 0);
     }
 
+    /**
+     * Menú para registrar un coche en un concesionario, pidiendo por consola los datos para luego enviarlos al metodo que lo registrará
+     */
     private static void menuAltaCoche() {
         Scanner sc = new Scanner(System.in);
         System.out.println("Alta de coche\n");
 
         String matricula = null;
         boolean exito = false;
+        //Bucle que pide la matricula y comprueba que sea válida
         do {
             System.out.println("Introduce una matricula: (Deja en blanco para cancelar)");
             matricula = sc.nextLine();
             if (matricula != null && matricula.trim().isBlank()) return;
-            assert matricula != null;
-            exito = Servicios.altaCoche(matricula);
+            else if (!matricula.matches("^[0-9]{4}[A-Za-z]{3}$")) {
+                System.out.println("--- Error: Formato de matricula incorrecto (####***) ---");
+            } else if (Servicios.existeCoche(matricula)) System.out.println("--- Error: Ya existe esta matricula ---");
+            else exito = true;
         } while (!exito);
 
-        int id = 0;
+        long id = 0;
         List<Concesionario> concesionarios = Servicios.listadoConcesionarios();
         System.out.println(concesionarios);
         while (true) {
@@ -90,8 +102,7 @@ public class Menu {
             } catch (NumberFormatException e) {
                 id = -1; // Fuerza el default en el switch
             }
-            int finalId = id;
-            if (concesionarios.stream().anyMatch(concesionario -> concesionario.getId() == finalId)) break;
+            if (Servicios.existeConcesionario(id)) break;
         }
         System.out.println("Introduce la marca:");
         String marca = sc.nextLine();
@@ -108,12 +119,14 @@ public class Menu {
             }
             if (precioBase >= 0) break;
         }
-        int finalId = id;
-        Concesionario concesionariont = concesionarios.stream().filter(concesionario -> concesionario.getId() == finalId).findFirst().orElse(null);
-        Servicios.altaCoche(matricula, marca, modelo, precioBase, concesionariont);
+        //Manda todos los valores del coche al metodo para
+        Servicios.altaCoche(matricula, marca, modelo, precioBase, id);
 
     }
 
+    /**
+     *Recoge los datos del concesionario para mandorlos al metodo que los insertará en la base de datos
+     */
     private static void menuAltaConcesionario() {
         System.out.println("Alta de concesionario");
         System.out.println("Nombre del Concesionario: (Deja en blanco para cancelar)");
@@ -125,6 +138,9 @@ public class Menu {
         Servicios.altaConcesionario(nombre, direccion);
     }
 
+    /**
+     * Menu que redirige al metodo para intalar extras o al de registrar reparaciones
+     */
     private static void menuTaller() {
         int opcion;
         do {
@@ -150,23 +166,27 @@ public class Menu {
         } while (opcion != 0);
     }
 
+    /**
+     * Recoge los datos de la reparacion para mandarlos al metodo que la registra en la base de datos
+     */
     private static void menuRegistrarReparacion() {
         boolean menu = true;
         String matricula = null;
         List<Coche> coches = Servicios.listadoCoches();
         System.out.println(coches);
+        //bucle para comprobar que el coche existe o cancelar
         while (menu) {
             System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
             matricula = sc.nextLine();
-            String finalId = matricula;
-            Coche cochent = coches.stream().filter(coche -> Objects.equals(coche.getMatricula(), finalId.trim())).findFirst().orElse(null);
-            if (cochent != null || finalId.trim().equals("0")) menu = false;
+
+            if (matricula.trim().equals("0") || Servicios.existeCoche(matricula)) menu = false;
         }
         if (matricula.trim().equals("0")) return;
         menu = true;
-        int id = 0;
+        long id = 0;
         List<Mecanico> mecanicos = Servicios.listadoMecanicos();
         System.out.println(mecanicos);
+        //bucle para comprobar que el mecanico existe o cancelar
         while (menu) {
             System.out.println("Inserta la ID del Mecánico. Inserte 0 para cancelar:");
             try {
@@ -174,8 +194,7 @@ public class Menu {
             } catch (NumberFormatException e) {
                 id = -1;
             }
-            int finalId = id;
-            if (mecanicos.stream().anyMatch(mecanico -> mecanico.getId() == finalId) || finalId == 0) menu = false;
+            if (id == 0 || Servicios.existeMecanico(id)) menu = false;
         }
         if (id == 0) return;
         System.out.println("¿Quieres insertar una fecha?");
@@ -188,6 +207,7 @@ public class Menu {
         } catch (NumberFormatException e) {
             opcion = -1;
         }
+        //menu para la fecha
         switch (opcion) {
             case 1 -> {
                 System.out.println("Introducida fecha actual.");
@@ -205,6 +225,7 @@ public class Menu {
         } catch (NumberFormatException e) {
             opcion = -1;
         }
+        //menu para el coste
         switch (opcion) {
             case 1 -> {
                 while (true) {
@@ -230,6 +251,7 @@ public class Menu {
         } catch (NumberFormatException e) {
             opcion = -1;
         }
+        //menu para la descripción
         switch (opcion) {
             case 1 -> {
                 System.out.println("Inserta Descripción:");
@@ -240,14 +262,19 @@ public class Menu {
             }
         }
 
+        //llamada al metodo que registra la reparación
         Servicios.registrarReparacion(matricula, id, fecha, coste, descripcion);
     }
 
+    /**
+     * ecoge los datos del coche y el extra para mandarlos al metodo que registra la instalacion en la base de datos
+     */
     private static void menuInstalarExtra() {
         boolean menu = true;
         String matricula = null;
         List<Coche> coches = Servicios.listadoCoches();
         System.out.println(coches);
+        //bucle para comprobar que el coche existe o cancelar
         while (menu) {
             System.out.println("Inserta la matrícula del Coche. Inserte 0 para cancelar:");
             matricula = sc.nextLine();
@@ -258,6 +285,7 @@ public class Menu {
         long id = 0;
         List<Equipamiento> equipamientos = Servicios.listadoEquipamientos();
         System.out.println(equipamientos);
+        //bucle para comprobar que el equipamiento existe o cancelar
         while (menu) {
             System.out.println("Inserta la ID del Equipamiento. Inserte 0 para cancelar:");
             try {
@@ -268,9 +296,13 @@ public class Menu {
             if (id == 0 || Servicios.existeEquipamiento(id)) menu = false;
         }
         if (id == 0) return;
+        //llamada al metodo que instala el equipamiento en el coche
         Servicios.instalarExtra(matricula, id);
     }
 
+    /**
+     * Menu de venta de coche
+     */
     private static void menuVentas() {
         int opcion;
         do {
@@ -294,6 +326,9 @@ public class Menu {
         } while (opcion != 0);
     }
 
+    /**
+     * Menu para elegir si crear un propietario nuevo
+     */
     private static void menuVenderCoche() {
         int opcion;
         do {
@@ -311,9 +346,11 @@ public class Menu {
 
             switch (opcion) {
                 case 1 -> {
+                    //realiza la llamada al metodo de venta con la id devuelta por el metodo de crear un nuevo propietario
                     menuVentaCoche(menuNuevoPropietario());
                 }
                 case 2 -> {
+                    //realiza la llamada con un 0 para indicar que hay que seleccionar un propietario
                     menuVentaCoche(0);
                     return;
                 }
@@ -324,20 +361,30 @@ public class Menu {
         } while (opcion != 0);
     }
 
+    /**
+     * Recoge los datos del coche, propietario y concesionario
+     * @param id ID del propietario
+     */
     private static void menuVentaCoche(long id) {
+        //Si la id es -1 vuelve corta el metodo
         if (id == -1) return;
+        //si la id es 0 llama al metodo de seleccion de propietario
         if (id == 0) id = menuSelectPropietario();
 
+        //llamada al metodo con un cero para indicarle lo que debe devolver (ID de lconcesionario)
         long idConcesionario = menuStockVentasConcesionario(0);
+        //en caso de haber devuelto un 0, corta el metodo
         if (idConcesionario == 0) return;
 
+        //llamada al metodo que devuelve la lista de coches en un concesionario
         List<Coche> coches = Servicios.stockConcesionario(idConcesionario);
         System.out.println(coches);
-        String matricula = null;
-        matricula = getIdCoche();
+        //llamada a metodo que comprueba que la matrícula sea la de un coche con propietario
+        String matricula = getIdCoche();
         if (matricula == null) return;
 
         double precio = 0;
+        //comprueba que el precio de venta sea válido
         do {
             System.out.println("Indica el precio de venta:");
             try {
@@ -348,10 +395,15 @@ public class Menu {
             }
         } while (!(precio > 0));
 
+        //Llamada al metodo que realizará la venta
         Servicios.venderCoche(id, idConcesionario, matricula, precio);
 
     }
 
+    /**
+     * Asegura la selección de un coche con propietario
+     * @return Matrícula del coche seleccionado (o null en caso de cancelar)
+     */
     private static String getIdCoche() {
         String matricula = null;
         boolean menu = true;
@@ -371,6 +423,10 @@ public class Menu {
         return matricula;
     }
 
+    /**
+     * Menu de selección de propietario
+     * @return ID del propietario
+     */
     private static long menuSelectPropietario() {
         List<Propietario> propietarios = Servicios.listadoPropietarios();
         boolean menu = true;
@@ -389,6 +445,10 @@ public class Menu {
         return id;
     }
 
+    /**
+     * Recoge los datos del nuevo propietario para mandarlos al metodo que lo creará
+     * @return ID del propietario recién creado o -1 en caso de que ya exista
+     */
     private static long menuNuevoPropietario() {
         System.out.println("Introduce el DNI del Propietario:");
         String dni = sc.nextLine();
@@ -397,6 +457,9 @@ public class Menu {
         return Servicios.nuevoPropietario(dni, nombre);
     }
 
+    /**
+     * Menu de consultas e informes
+     */
     private static void menuConsultas() {
         int opcion;
         do {
@@ -426,14 +489,21 @@ public class Menu {
         } while (opcion != 0);
     }
 
+    /**
+     * Recoge la ID del coche para calcular su coste
+     */
     private static void menuCosteActualCoche() {
-        String id = null;
         List<Coche> coches = Servicios.listadoCochesPropietarios();
         System.out.println(coches);
-        id = getIdCoche();
+        //recoge la id de un metodo que se asegura que el coche exista
+        String id = getIdCoche();
+        //manda la id al metodo que calcula el coste total
         Servicios.costeActualCoche(id);
     }
 
+    /**
+     * Recoge la ID del mecánico
+     */
     private static void menuHistorialMecanico() {
         boolean menu = true;
         long id = 0;
@@ -450,9 +520,14 @@ public class Menu {
             if (id == 0 || Servicios.existeMecanico(id)) menu = false;
         }
         if (id == 0) return;
-        Servicios.historialMecanico(id);
+        System.out.println(Servicios.historialMecanico(id));
     }
 
+    /**
+     * Imprime por pantalla el stock de un concesionario, sus ventas, o devuelve la id
+     * @param stock determina que operaciones debe realizar el metodo
+     * @return La ID de l concesionario o 0
+     */
     private static long menuStockVentasConcesionario(int stock) {
         boolean menu = true;
         long id = 0;
